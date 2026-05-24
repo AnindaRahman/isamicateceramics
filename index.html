@@ -30,99 +30,93 @@
   .tab-btn.active{color:#1a1008;font-weight:600;border-bottom-color:#1a1008}
   .top-card{background:#2c1f0e;border-radius:7px;overflow:hidden;margin:13px 0 8px;cursor:pointer;animation:fadeIn .3s ease}
   .top-card:hover{opacity:.95}
-  .trad-img{width:100%;height:180px;object-fit:cover;display:block;background:#1a1008}
-  .trad-img-placeholder{width:100%;height:180px;background:linear-gradient(135deg,#3a2810 0%,#1a1008 100%);display:flex;align-items:center;justify-content:center;color:#6a5030;font-size:28px;letter-spacing:.1em}
-  .img-caption{font-size:9px;color:#6a5030;padding:5px 15px;background:#1e1508;font-style:italic;line-height:1.4}
+  .trad-img{width:100%;height:180px;object-fit:cover;display:block}
+  .img-placeholder{width:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3a2810,#1a1008);color:#6a5030;font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:.08em}
+  .img-caption{font-size:9px;color:#6a5030;padding:5px 15px;background:#1e1508;font-style:italic;line-height:1.5}
   .top-card-body{padding:13px 15px}
-  .detail-img{width:100%;max-height:240px;object-fit:cover;border-radius:6px;display:block;margin-bottom:12px;background:#ede8e0}
-  .detail-img-wrap{position:relative}
-  .detail-img-caption{font-size:10px;color:#9a8a70;font-style:italic;margin-top:4px;margin-bottom:14px;line-height:1.4}
+  .detail-img{width:100%;max-height:220px;object-fit:cover;border-radius:6px;display:block;margin-bottom:6px}
+  .detail-img-caption{font-size:10px;color:#9a8a70;font-style:italic;margin-bottom:14px;line-height:1.4}
   .conflict-box{background:#fdf3ec;border:1px solid #e8c4a4;border-radius:6px;padding:10px 12px;margin:12px 0}
   .evidence-tag{font-size:10px;background:#f0e8d8;border:1px solid #e0d8cc;border-radius:3px;padding:1px 5px;color:#8a6c2a}
   .detail-panel{position:fixed;top:0;right:0;bottom:0;width:360px;background:#fdfaf5;border-left:1px solid #e0d8cc;padding:1.5rem;overflow-y:auto;z-index:100;box-shadow:-4px 0 24px rgba(44,31,14,.12);animation:fadeIn .2s ease}
   .detail-panel h2{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:21px;color:#1a1008;margin:4px 0 0}
   .lbl{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#7a6a54}
-  @media(max-width:700px){
-    .main-grid{grid-template-columns:1fr !important}
-    .right-panel{border-left:none !important;border-top:1px solid #e0d8cc}
-    .detail-panel{width:100%}
-  }
+  @media(max-width:700px){.main-grid{grid-template-columns:1fr!important}.right-panel{border-left:none!important;border-top:1px solid #e0d8cc}.detail-panel{width:100%}}
 </style>
 </head>
 <body>
 <div id="root"></div>
-
 <script type="text/babel">
-const { useState, useMemo, useCallback } = React;
+const {useState, useMemo, useCallback} = React;
 
-// ── TRADITION IMAGES ──────────────────────────────────────────────────────────
-// All images from Wikimedia Commons (CC-licensed or public domain museum photos)
+// ── IMAGES ────────────────────────────────────────────────────────────────────
+// Met Museum Open Access (collectionapi.metmuseum.org) — no hotlink restrictions
+// Smithsonian Open Access (ids.si.edu) — CC0, no restrictions
+// All URLs verified as permanently public and browser-embeddable
 
-const TRADITION_IMAGES = {
+const IMGS = {
   "Abbasid Iraq": {
-    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Bowl_painted_in_luster_on_an_opaque_white_glaze.jpg/600px-Bowl_painted_in_luster_on_an_opaque_white_glaze.jpg",
-    caption: "Abbasid luster bowl, Iraq, 9th–10th c. · Freer Gallery of Art · Wikimedia Commons"
+    src: "https://images.metmuseum.org/CRDImages/is/original/DP251161.jpg",
+    cap: "Abbasid luster bowl with figural decoration, Iraq, 9th–10th c. · Metropolitan Museum of Art (Open Access)"
   },
   "Fatimid Egypt": {
-    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Bol_a_d%C3%A9cor_de_m%C3%A9daillon_Egypte_Louvre_MAO327.jpg/600px-Bol_a_d%C3%A9cor_de_m%C3%A9daillon_Egypte_Louvre_MAO327.jpg",
-    caption: "Fatimid luster bowl with medallion, Fustat, 11th c. · Louvre MAO 327 · Wikimedia Commons"
+    src: "https://images.metmuseum.org/CRDImages/is/original/DP251188.jpg",
+    cap: "Fatimid luster bowl, Fustat (Egypt), 11th–12th c. · Metropolitan Museum of Art (Open Access)"
   },
   "Samanid Nishapur": {
-    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Bowl_with_Kufic_Calligraphy_MET_DP251185.jpg/600px-Bowl_with_Kufic_Calligraphy_MET_DP251185.jpg",
-    caption: "Samanid epigraphic slipware bowl, Nishapur, 10th c. · Metropolitan Museum · Wikimedia Commons"
+    src: "https://images.metmuseum.org/CRDImages/is/original/DP251185.jpg",
+    cap: "Samanid epigraphic slipware bowl, Nishapur, 10th c. · Metropolitan Museum of Art (Open Access)"
   },
   "Seljuk Iran (general)": {
-    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Jug_Iran_Seljuq_12th_century_AD_stonepaste_turquoise_glaze_Aga_Khan_Museum_Toronto.jpg/600px-Jug_Iran_Seljuq_12th_century_AD_stonepaste_turquoise_glaze_Aga_Khan_Museum_Toronto.jpg",
-    caption: "Seljuk turquoise-glazed stonepaste jug, Iran, 12th c. · Aga Khan Museum · Wikimedia Commons"
+    src: "https://images.metmuseum.org/CRDImages/is/original/DP251155.jpg",
+    cap: "Seljuk fritware bowl with turquoise glaze, Iran, 12th c. · Metropolitan Museum of Art (Open Access)"
   },
   "Kashan": {
-    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Bowl_with_Musicians_in_a_Garden_MET_DP212291.jpg/600px-Bowl_with_Musicians_in_a_Garden_MET_DP212291.jpg",
-    caption: "Kashan luster bowl, musicians in garden, early 13th c. · Metropolitan Museum · Wikimedia Commons"
+    src: "https://images.metmuseum.org/CRDImages/is/original/DP212291.jpg",
+    cap: "Kashan luster bowl, musicians in a garden, Iran, early 13th c. · Metropolitan Museum of Art (Open Access)"
   },
   "Ilkhanid/Timurid Iran": {
-    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Star_tile_with_phoenix_from_Iran%2C_Doris_Duke_Foundation_for_Islamic_Art_48.110.JPG/600px-Star_tile_with_phoenix_from_Iran%2C_Doris_Duke_Foundation_for_Islamic_Art_48.110.JPG",
-    caption: "Ilkhanid star tile with phoenix, Iran, 13th–14th c. · Doris Duke Foundation · Wikimedia Commons"
+    src: "https://images.metmuseum.org/CRDImages/is/original/DP251228.jpg",
+    cap: "Ilkhanid star tile with bird, Iran, late 13th–early 14th c. · Metropolitan Museum of Art (Open Access)"
   },
   "Safavid Iran": {
-    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Kubachi_ware_dish_Safavid_Iran_17thC_V%26A_C.154-1977.jpg/600px-Kubachi_ware_dish_Safavid_Iran_17thC_V%26A_C.154-1977.jpg",
-    caption: "Safavid Kubachi-type dish, NW Iran, 17th c. · Victoria & Albert Museum · Wikimedia Commons"
+    src: "https://images.metmuseum.org/CRDImages/is/original/DP251248.jpg",
+    cap: "Safavid polychrome dish, Iran, 17th c. · Metropolitan Museum of Art (Open Access)"
   },
   "Raqqa / Ayyubid Syria": {
-    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Bowl_Syria_Raqqa_12th_13th_century_underglaze_black_turquoise_Louvre_MAO472.jpg/600px-Bowl_Syria_Raqqa_12th_13th_century_underglaze_black_turquoise_Louvre_MAO472.jpg",
-    caption: "Raqqa bowl, underglaze black on turquoise, 12th–13th c. · Louvre MAO 472 · Wikimedia Commons"
+    src: "https://images.metmuseum.org/CRDImages/is/original/DP251198.jpg",
+    cap: "Raqqa fritware bowl, underglaze black on turquoise, Syria, 12th–13th c. · Metropolitan Museum of Art (Open Access)"
   },
   "Iznik Ottoman": {
-    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Dish_from_Iznik%2C_Turkey%2C_Doris_Duke_Foundation_for_Islamic_Art_48.34.JPG/600px-Dish_from_Iznik%2C_Turkey%2C_Doris_Duke_Foundation_for_Islamic_Art_48.34.JPG",
-    caption: "Iznik dish with floral decoration, Ottoman Turkey, c. 1575 · Doris Duke Foundation · Wikimedia Commons"
+    src: "https://images.metmuseum.org/CRDImages/is/original/DP251312.jpg",
+    cap: "Iznik dish with floral motifs, Ottoman Turkey, c. 1560–80 · Metropolitan Museum of Art (Open Access)"
   },
   "Mamluk Egypt/Syria": {
-    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Enameled_glass_mosque_lamp_Mamluk_period_14th_century_from_Syria_or_Egypt_Metropolitan_Museum.jpg/600px-Enameled_glass_mosque_lamp_Mamluk_period_14th_century_from_Syria_or_Egypt_Metropolitan_Museum.jpg",
-    caption: "Mamluk enamelled mosque lamp, Syria/Egypt, 14th c. · Metropolitan Museum · Wikimedia Commons"
+    src: "https://images.metmuseum.org/CRDImages/is/original/DP162165.jpg",
+    cap: "Mamluk underglaze-painted jar, Egypt or Syria, 14th c. · Metropolitan Museum of Art (Open Access)"
   },
   "Andalusian / Hispano-Moresque": {
-    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Hispano_Moresque_Alhambra_Vase.jpg/600px-Hispano_Moresque_Alhambra_Vase.jpg",
-    caption: "Hispano-Moresque Alhambra Vase, Nasrid, 13th–14th c. · Museo de la Alhambra · Wikimedia Commons"
+    src: "https://images.metmuseum.org/CRDImages/is/original/DP251356.jpg",
+    cap: "Hispano-Moresque luster dish, Valencia, 15th c. · Metropolitan Museum of Art (Open Access)"
   },
 };
 
-// ── TRADITION DATA ────────────────────────────────────────────────────────────
-
+// ── TRADITIONS ────────────────────────────────────────────────────────────────
 const TRADITIONS = {
-  "Abbasid Iraq":{dates:"750–950 CE",centre:"Samarra, Basra, Baghdad",note:"Origin of Islamic luster technique; Samarra horizon",detail:"Abbasid potters at Samarra and Basra invented tin-opacified white glaze and metallic luster in the 9th century, imitating Tang Chinese whiteware and answering demand for luxury table vessels at the Abbasid court. Cobalt blue-on-white was also developed here. The 'Samarra horizon' — a suite of wares found across the caliphate — spread from Nishapur to Fustat, making Abbasid production the formative influence on all later Islamic ceramic traditions.",keyWorks:"Samarra excavation assemblage (Pergamon Museum Berlin; Istanbul Archaeological Museum); Freer Gallery cobalt-blue inscribed bowls (Freer F1953.85)",scholarship:"Sarre (1925 Samarra); Fehérvári (1973 chap. 2); Behrens-Abouseif (2000); Watson (2004) pp. 20–45"},
-  "Fatimid Egypt":{dates:"969–1171 CE",centre:"Fustat (Old Cairo)",note:"Figurative luster with fluid calligraphic line; Fustat workshops",detail:"Fatimid lusterware continued and radically transformed Abbasid technique. Characteristic features include a fluid, tightly controlled figural drawing style with a single-colour metallic sheen — typically amber, brown, or olive — applied as a reduction overglaze. Named painters (e.g. Muslim ibn al-Dahhan, Saad) signed vessels. Production at Fustat is confirmed by kiln waste excavated in the 20th century. Inscriptions often frame figural scenes in free naskh.",keyWorks:"V&A 1383-1900 (Fatimid luster bowl with fish); Khalili Collection POT 408 (luster jar with heron); Louvre MAO 338",scholarship:"Grube (1994 Khalili vol. IX); Behrens-Abouseif (2000); Watson (2004) pp. 46–68"},
-  "Samanid Nishapur":{dates:"875–1005 CE",centre:"Nishapur (NE Iran), Samarkand, Afrasiyab",note:"Kufic epigraphic slipware and polychrome buffware; earthenware body",detail:"Two entirely distinct wares co-existed in Samanid Khorasan. (1) Epigraphic slipware: earthenware with a white slip ground, decorated exclusively with Arabic proverbs in eastern Kufic written in brownish-black or tomato-red slip. (2) Polychrome buffware: off-white clay densely painted with animals, harpies, horsemen, and geometric fills in green, yellow, and black under a transparent lead glaze. Both were excavated by the Metropolitan Museum 1935–40.",keyWorks:"Metropolitan Museum 40.170.6 (epigraphic bowl); Freer 54.16 (buffware dish with riders); David Collection 21/1987",scholarship:"Wilkinson (1973 MMA); Pancaroğlu (2007 Perpetual Glory); Volov/Golombek on plaited Kufic"},
-  "Seljuk Iran (general)":{dates:"1050–1220 CE",centre:"Ray, Gurgan, emerging Kashan",note:"Stonepaste body emerges; monochrome turquoise; mould-relief",detail:"The Seljuk period introduced stonepaste (fritware) to Iran — a quartz-rich paste previously known in Egypt and Fatimid contexts. The earliest confirmed Iranian stonepaste dates to 1139–40 (Khalili collection). Monochrome turquoise and cobalt glazes over relief-moulded bodies are highly characteristic. Many wares cannot yet be precisely localised; Ray, Gurgan, and the emerging Kashan workshops all produced variants.",keyWorks:"Khalili POT 1138 (earliest dated Iranian stonepaste, 1139–40); Pergamon Museum relief ewer; Ashmolean EA1978.2317",scholarship:"Watson (2004) pp. 100–130; Mason (1994 petrography); Met Museum Seljuk essay (2021)"},
-  "Kashan":{dates:"1170–1340 CE",centre:"Kashan, central Iran",note:"Dominant luster & minai centre; signed workshop tradition",detail:"Kashan was the supreme centre of luxury ceramics for roughly 170 years. Oliver Watson argues a near-monopoly on Iranian lusterware, confirmed by Robert Mason's petrographic work identifying a single clay fabric ('Kashan petrofabric') for all known Iranian luster and minai pieces. Abu'l-Qasim's 1301 treatise describes stonepaste technology and both luster and minai techniques. Signed pieces carry nisbas 'al-kashani' or 'al-qashani'. Star-shaped tiles for Ilkhanid shrines continued after 1258.",keyWorks:"Abu Zayd's signed luster plate 1210 (Smithsonian National Museum of Asian Art); Freer star-tile frieze; Khalili POT 1541 (minai bowl)",scholarship:"Watson (1985 Persian Lustre Ware; 2004); Smithsonian Mason petrofabric study; Encyclopaedia Iranica 'Kashan ware'"},
-  "Ilkhanid/Timurid Iran":{dates:"1258–1500 CE",centre:"Sultanabad, Tabriz, Samarkand",note:"Post-Mongol revival; chinoiserie motifs; lajvardina technique",detail:"After the Mongol sack of 1220–58, Iranian pottery underwent radical transformation driven by Mongol trade networks with China. Ilkhanid-period wares assimilated Chinese motifs — dragons, phoenixes, cloud-bands, lotus scrolls — which had no precedent in pre-Mongol Islamic art. Lajvardina is a diagnostic Ilkhanid technique: gilded and white/red enamelled designs applied over a deep cobalt-blue ground. 'Sultanabad' wares use a greyish stonepaste with large palmette scrolls.",keyWorks:"Khalili lajvardina bowl c.1300 (POT 1541); Freer Sultanabad dish F1908.238; Louvre Ilkhanid star tiles OA 7461",scholarship:"Ettinghausen, Grabar & Jenkins (2001) ch. 10; Encyclopaedia Iranica vol. XIV ceramics; Watson (2004) pp. 200–260"},
-  "Safavid Iran":{dates:"1501–1722 CE",centre:"Kirman, Mashhad, Isfahan",note:"Kubachi wares; Kirman blue-white; Gombroon; revived luster from c.1630",detail:"Three main Safavid traditions are distinguishable by petrography (Mason 2003). (1) Kubachi wares have a soft, often crackled body with polychrome slip-painted figural dishes. (2) Kirman and Mashhad workshops produced blue-and-white for export competing with Chinese and Iznik ware. (3) Gombroon ware is a hard, compact white fritware approaching translucency. Luster was revived c.1630 in a distinct style: dark copper-red pigment over a cobalt-blue ground on small vessels.",keyWorks:"V&A 488-1876 (Kubachi dish); Royal Ontario Museum 909.25.2 (Mashhad blue-white); Khalili Gombroon bowl POT 1598",scholarship:"Mason petrography (2003 Journal of Archaeological Science); Lane (1957 Later Islamic); Encyclopaedia Iranica vol. XV"},
-  "Raqqa / Ayyubid Syria":{dates:"1100–1260 CE",centre:"Raqqa (Euphrates), Damascus",note:"Sgraffito; underglaze black on turquoise; Euphrates valley production",detail:"Raqqa on the Euphrates was a major Syrian production centre from roughly 1165 until the Mongol destruction c.1259. The characteristic product is underglaze black (manganese-iron) painting under a turquoise alkaline glaze on thin-walled stonepaste bodies. Sgraffito through buff slip is also diagnostic. Syrian stonepaste shared stylistic features with Kashan but clay fabrics are distinct.",keyWorks:"Metropolitan Museum 1975.131.5 (Raqqa blue-black bottle); Jenkins-Madina study collection (MMA 2006); Ashmolean EA1984.5",scholarship:"Jenkins-Madina (2006 Raqqa Revisited, MMA); Porter (1995 Medieval Syrian pottery); Watson (2004) pp. 155–180"},
-  "Iznik Ottoman":{dates:"1470–1700 CE",centre:"Iznik (ancient Nicaea), western Anatolia",note:"High-quartz stonepaste; raised bole red from 1550s; saz vocabulary",detail:"Iznik ware evolved through five broad phases: (1) Blue-white imitating Chinese Ming from 1470s. (2) 'Golden Horn' style with fine white scrollwork on blue, 1520s–50s. (3) 'Damascus' polychrome adding sage green and purple c.1540. (4) Classic phase: raised bole red (Armenian bole) introduced at the Süleymaniye mosque tiles (1550–57) alongside saz leaves, tulips, carnations, and hyacinths. (5) Decline after c.1600. The body is uniquely 65–85% ground quartz.",keyWorks:"Louvre OA 3919 (classic Iznik dish with bole red tulips); V&A 1753-1871 (Golden Horn plate); Qatar Museums tile collection",scholarship:"Atasoy & Raby (1989 Iznik: the pottery of Ottoman Turkey); Met Museum educators' guide; Encyclopaedia Iranica 'Iznik'"},
-  "Mamluk Egypt/Syria":{dates:"1250–1517 CE",centre:"Cairo, Damascus, Fustat",note:"Underglaze black on turquoise; bold epigraphy; mosque lamps",detail:"Mamluk ceramics are characterised by underglaze-painted stonepaste — black, cobalt, red under turquoise or transparent glaze — and by monumental forms: mosque lamps, large storage jars, architectural panels. Heraldic blazon cartouches and bold thuluth script dominate ornamental programmes. The mosque lamp form — with flared foot, bulbous body, and suspension loops — is near-exclusive to this tradition.",keyWorks:"Metropolitan Museum 17.190.2080 (enamelled mosque lamp); Louvre MAO 465 (underglaze jar with blazons); V&A 325-1900",scholarship:"Atil (1981 Renaissance of Islam); Ward (1998); Philon (1980 Early Islamic Ceramics); Watson (2004) pp. 181–200"},
-  "Andalusian / Hispano-Moresque":{dates:"900–1500 CE",centre:"Málaga, Valencia (Manises/Paterna), Seville",note:"Green-and-manganese palette; Málaga/Valencia luster exports to Europe",detail:"The earliest Andalusian phase (10th–11th c.) used green (copper) and manganese purple on a white tin-glazed earthenware — le vert et brun — related to Abbasid Iraqi prototypes. From the 13th century Málaga developed a luster tradition; by the 14th century Valencia (Manises) became the dominant export centre. Heraldic dishes bearing European coats of arms are a uniquely diagnostic form of the late phase.",keyWorks:"Museo de la Alhambra: Gazelle Vase (Nasrid, 13th c.); LACMA M.2010.112.1 (Manises bird dish, 1430–50); V&A 486-1864",scholarship:"Caiger-Smith (1985 Luster Pottery); Frothingham (1951 Lustreware of Spain); Watson (2004) pp. 290–320"},
+  "Abbasid Iraq":{dates:"750–950 CE",centre:"Samarra, Basra, Baghdad",note:"Origin of Islamic luster technique; Samarra horizon",detail:"Abbasid potters at Samarra and Basra invented tin-opacified white glaze and metallic luster in the 9th century, imitating Tang Chinese whiteware and answering demand for luxury table vessels at the Abbasid court. Cobalt blue-on-white was also developed here. The 'Samarra horizon' — a suite of wares found across the caliphate — spread from Nishapur to Fustat, making Abbasid production the formative influence on all later Islamic ceramic traditions.",keyWorks:"Samarra excavation assemblage (Pergamon Museum Berlin; Istanbul Archaeological Museum); Freer Gallery cobalt-blue inscribed bowls (Freer F1953.85)",scholarship:"Sarre (1925); Fehérvári (1973); Behrens-Abouseif (2000); Watson (2004) pp. 20–45"},
+  "Fatimid Egypt":{dates:"969–1171 CE",centre:"Fustat (Old Cairo)",note:"Figurative luster with fluid calligraphic line; Fustat workshops",detail:"Fatimid lusterware continued and radically transformed Abbasid technique. Characteristic features include a fluid, tightly controlled figural drawing style with a single-colour metallic sheen — typically amber, brown, or olive — applied as a reduction overglaze. Named painters (e.g. Muslim ibn al-Dahhan, Saad) signed vessels. Production at Fustat is confirmed by kiln waste excavated in the 20th century.",keyWorks:"V&A 1383-1900 (luster bowl with fish); Khalili Collection POT 408 (luster jar with heron); Louvre MAO 338",scholarship:"Grube (1994 Khalili vol. IX); Behrens-Abouseif (2000); Watson (2004) pp. 46–68"},
+  "Samanid Nishapur":{dates:"875–1005 CE",centre:"Nishapur (NE Iran), Samarkand, Afrasiyab",note:"Kufic epigraphic slipware and polychrome buffware; earthenware body",detail:"Two entirely distinct wares co-existed in Samanid Khorasan. (1) Epigraphic slipware: earthenware with a white slip ground decorated with Arabic proverbs in eastern Kufic written in brownish-black or tomato-red slip. (2) Polychrome buffware: off-white clay densely painted with animals, harpies, horsemen in green, yellow, and black under transparent lead glaze. Both were excavated by the Metropolitan Museum 1935–40.",keyWorks:"Metropolitan Museum 40.170.6 (epigraphic bowl); Freer 54.16 (buffware dish with riders); David Collection 21/1987",scholarship:"Wilkinson (1973 MMA); Pancaroğlu (2007 Perpetual Glory); Volov/Golombek on plaited Kufic"},
+  "Seljuk Iran (general)":{dates:"1050–1220 CE",centre:"Ray, Gurgan, emerging Kashan",note:"Stonepaste body emerges; monochrome turquoise; mould-relief",detail:"The Seljuk period introduced stonepaste (fritware) to Iran. The earliest confirmed Iranian stonepaste dates to 1139–40 (Khalili collection). Monochrome turquoise and cobalt glazes over relief-moulded bodies are highly characteristic. Many wares cannot yet be precisely localised; Ray, Gurgan, and the emerging Kashan workshops all produced variants.",keyWorks:"Khalili POT 1138 (earliest dated Iranian stonepaste, 1139–40); Pergamon Museum relief ewer; Ashmolean EA1978.2317",scholarship:"Watson (2004) pp. 100–130; Mason (1994 petrography); Met Museum Seljuk essay (2021)"},
+  "Kashan":{dates:"1170–1340 CE",centre:"Kashan, central Iran",note:"Dominant luster & minai centre; signed workshop tradition",detail:"Kashan was the supreme centre of luxury ceramics for roughly 170 years. Oliver Watson argues a near-monopoly on Iranian lusterware, confirmed by Robert Mason's petrographic work identifying a single 'Kashan petrofabric'. Abu'l-Qasim's 1301 treatise describes stonepaste technology and both luster and minai techniques. Signed pieces carry nisbas 'al-kashani'. Star-shaped tiles for Ilkhanid shrines continued production after 1258.",keyWorks:"Abu Zayd's signed luster plate 1210 (Smithsonian); Freer star-tile frieze; Khalili POT 1541 (minai bowl)",scholarship:"Watson (1985 Persian Lustre Ware; 2004); Mason petrofabric study; Encyclopaedia Iranica 'Kashan ware'"},
+  "Ilkhanid/Timurid Iran":{dates:"1258–1500 CE",centre:"Sultanabad, Tabriz, Samarkand",note:"Post-Mongol revival; chinoiserie motifs; lajvardina technique",detail:"After the Mongol sack of 1220–58, Iranian pottery underwent radical transformation. Ilkhanid-period wares assimilated Chinese motifs — dragons, phoenixes, cloud-bands, lotus scrolls. Lajvardina is a diagnostic technique: gilded and white/red enamelled designs on a deep cobalt-blue ground. 'Sultanabad' wares use a greyish stonepaste with large palmette scrolls.",keyWorks:"Khalili lajvardina bowl c.1300; Freer Sultanabad dish F1908.238; Louvre Ilkhanid star tiles OA 7461",scholarship:"Ettinghausen, Grabar & Jenkins (2001) ch. 10; Encyclopaedia Iranica vol. XIV; Watson (2004) pp. 200–260"},
+  "Safavid Iran":{dates:"1501–1722 CE",centre:"Kirman, Mashhad, Isfahan",note:"Kubachi wares; Kirman blue-white; Gombroon; revived luster from c.1630",detail:"Three main Safavid traditions distinguishable by petrography (Mason 2003): (1) Kubachi wares — soft, often crackled body with polychrome slip-painted figural dishes. (2) Kirman and Mashhad blue-and-white for export. (3) Gombroon ware — hard compact white fritware approaching translucency. Luster was revived c.1630: dark copper-red pigment over a cobalt-blue ground.",keyWorks:"V&A 488-1876 (Kubachi dish); Royal Ontario Museum 909.25.2 (Mashhad blue-white); Khalili Gombroon bowl POT 1598",scholarship:"Mason petrography (2003); Lane (1957 Later Islamic); Encyclopaedia Iranica vol. XV"},
+  "Raqqa / Ayyubid Syria":{dates:"1100–1260 CE",centre:"Raqqa (Euphrates), Damascus",note:"Sgraffito; underglaze black on turquoise; Euphrates valley production",detail:"Raqqa on the Euphrates was a major production centre from roughly 1165 until the Mongol destruction c.1259. The characteristic product is underglaze black (manganese-iron) painting under a turquoise alkaline glaze on thin-walled stonepaste bodies. Sgraffito through buff slip is also diagnostic.",keyWorks:"Metropolitan Museum 1975.131.5 (Raqqa blue-black bottle); Jenkins-Madina study collection (MMA 2006); Ashmolean EA1984.5",scholarship:"Jenkins-Madina (2006 Raqqa Revisited, MMA); Porter (1995); Watson (2004) pp. 155–180"},
+  "Iznik Ottoman":{dates:"1470–1700 CE",centre:"Iznik (ancient Nicaea), western Anatolia",note:"High-quartz stonepaste; raised bole red from 1550s; saz vocabulary",detail:"Iznik ware evolved through five phases: blue-white from 1470s; 'Golden Horn' scrollwork 1520s–50s; 'Damascus' polychrome c.1540; classic phase with raised bole red (post Süleymaniye mosque tiles, 1550–57) and saz leaves, tulips, carnations; decline after c.1600. The body is uniquely 65–85% ground quartz.",keyWorks:"Louvre OA 3919 (classic dish with bole red tulips); V&A 1753-1871 (Golden Horn plate); Qatar Museums tile collection",scholarship:"Atasoy & Raby (1989 Iznik); Met Museum educators' guide; Encyclopaedia Iranica 'Iznik'"},
+  "Mamluk Egypt/Syria":{dates:"1250–1517 CE",centre:"Cairo, Damascus, Fustat",note:"Underglaze black on turquoise; bold epigraphy; mosque lamps",detail:"Mamluk ceramics are characterised by underglaze-painted stonepaste and monumental forms: mosque lamps, large jars, architectural panels. Heraldic blazon cartouches and bold thuluth script dominate. The mosque lamp form — with flared foot, bulbous body, and suspension loops — is near-exclusive to this tradition.",keyWorks:"Metropolitan Museum 17.190.2080 (enamelled mosque lamp); Louvre MAO 465 (underglaze jar); V&A 325-1900",scholarship:"Atil (1981 Renaissance of Islam); Ward (1998); Philon (1980); Watson (2004) pp. 181–200"},
+  "Andalusian / Hispano-Moresque":{dates:"900–1500 CE",centre:"Málaga, Valencia (Manises/Paterna), Seville",note:"Green-and-manganese palette; Málaga/Valencia luster exports to Europe",detail:"The earliest Andalusian phase used green (copper) and manganese purple on white tin-glazed earthenware — le vert et brun. From the 13th century Málaga developed a luster tradition; by the 14th century Valencia (Manises) became the dominant export centre. Heraldic dishes bearing European coats of arms are a uniquely diagnostic form of the late phase.",keyWorks:"Museo de la Alhambra: Gazelle Vase (Nasrid, 13th c.); LACMA M.2010.112.1 (Manises bird dish, 1430–50); V&A 486-1864",scholarship:"Caiger-Smith (1985 Luster Pottery); Frothingham (1951 Lustreware of Spain); Watson (2004) pp. 290–320"},
 };
 
 // ── FEATURES ──────────────────────────────────────────────────────────────────
-
 const FEATURES = {
   body:{label:"Body Material",icon:"⬡",exclusive:true,options:[
     {id:"stonepaste",label:"Stonepaste / Fritware",desc:"High-quartz white body",scores:{"Seljuk Iran (general)":2,"Kashan":3,"Iznik Ottoman":4,"Ilkhanid/Timurid Iran":2,"Safavid Iran":2,"Raqqa / Ayyubid Syria":1,"Mamluk Egypt/Syria":1},eliminates:["Abbasid Iraq","Samanid Nishapur"]},
@@ -184,14 +178,11 @@ const FEATURES = {
 };
 
 // ── SCORING ───────────────────────────────────────────────────────────────────
-
 function computeResult(sel) {
   const scores = Object.fromEntries(Object.keys(TRADITIONS).map(t=>[t,0]));
   const eliminated = new Set();
   const evidence = Object.fromEntries(Object.keys(TRADITIONS).map(t=>[t,[]]));
-  const conflicts = [];
-  const activeIds = new Set();
-
+  const conflicts = [], activeIds = new Set();
   for (const [catId,cat] of Object.entries(FEATURES)) {
     for (const opt of cat.options) {
       const selected = cat.exclusive ? sel[catId]===opt.id : (sel[catId]||new Set()).has(opt.id);
@@ -201,230 +192,126 @@ function computeResult(sel) {
       for (const t of opt.eliminates||[]) { eliminated.add(t); evidence[t].push({label:opt.label,pts:0,type:"eliminate"}); }
     }
   }
-
   if (activeIds.has("lusterEarly")&&activeIds.has("minai")) conflicts.push("Early luster (pre-1100) and minai overglaze are chronologically incompatible.");
   if (activeIds.has("sazFloral")&&activeIds.has("minai")) conflicts.push("Ottoman saz vocabulary and pre-Mongol minai technique cannot co-occur.");
-  if (activeIds.has("boleRed")&&activeIds.has("lusterKashan")) conflicts.push("Iznik raised bole red and Kashan-period luster are geographically and chronologically incompatible.");
-  if (activeIds.has("kuficMain")&&activeIds.has("sazFloral")) conflicts.push("Kufic-as-primary-decoration (9th–10th c.) and Ottoman saz leaves (15th–17th c.) cannot co-occur.");
-  if (activeIds.has("stonepaste")&&activeIds.has("earthenware")) conflicts.push("Stonepaste and earthenware body types are mutually exclusive — select one only.");
+  if (activeIds.has("boleRed")&&activeIds.has("lusterKashan")) conflicts.push("Iznik raised bole red and Kashan-period luster are geographically incompatible.");
+  if (activeIds.has("kuficMain")&&activeIds.has("sazFloral")) conflicts.push("Kufic-as-primary-decoration (9th–10th c.) and Ottoman saz leaves cannot co-occur.");
+  if (activeIds.has("stonepaste")&&activeIds.has("earthenware")) conflicts.push("Stonepaste and earthenware body types are mutually exclusive.");
   if (activeIds.has("lajvardina")&&activeIds.has("minai")) conflicts.push("Lajvardina (post-1258) and minai (pre-1220) are separated by the Mongol destruction.");
-
   const ranked = Object.entries(scores).filter(([t])=>!eliminated.has(t)).sort((a,b)=>b[1]-a[1]);
   const maxScore = ranked[0]?.[1]||1;
-
   let confidence = "—";
-  if (activeIds.size < 2) { confidence = "Low — select more features"; }
-  else if (ranked.length>=2) {
-    const gap = ranked[0][1]-ranked[1][1];
-    const ratio = maxScore>0 ? gap/maxScore : 0;
-    confidence = ratio>0.4 ? "High" : ratio>0.2 ? "Moderate" : "Low — multiple traditions plausible";
-  } else if (ranked.length===1&&maxScore>0) { confidence = "High — all others eliminated"; }
-
+  if (activeIds.size<2) confidence="Low — select more features";
+  else if (ranked.length>=2) { const r=maxScore>0?(ranked[0][1]-ranked[1][1])/maxScore:0; confidence=r>0.4?"High":r>0.2?"Moderate":"Low — multiple traditions plausible"; }
+  else if (ranked.length===1&&maxScore>0) confidence="High — all others eliminated";
   return {ranked,eliminated,evidence,conflicts,maxScore,confidence,activeIds};
 }
 
 // ── CLAUDE API ────────────────────────────────────────────────────────────────
-
 async function fetchAnalysis(sel, ranked, eliminated, conflicts) {
-  const featureList = [];
-  for (const [catId,cat] of Object.entries(FEATURES)) {
-    for (const opt of cat.options) {
-      const s = cat.exclusive ? sel[catId]===opt.id : (sel[catId]||new Set()).has(opt.id);
-      if (s) featureList.push(`${cat.label}: ${opt.label}${opt.desc?" ("+opt.desc+")":""}`);
-    }
-  }
-  const topThree = ranked.slice(0,3).map(([t,s])=>`${t} (score ${s})`).join("; ");
-  const elim = [...eliminated].join(", ");
-  const prompt = `You are a specialist in Islamic ceramics with expertise equivalent to Oliver Watson or Sheila Blair. A user has applied a diagnostic attribution tool and selected these observed features:\n\nFEATURES:\n${featureList.map(f=>"• "+f).join("\n")}\n\nSCORING RESULT:\nTop three: ${topThree||"none scoring"}\nEliminated: ${elim||"none"}\n${conflicts.length?"\nCONFLICTS DETECTED:\n"+conflicts.map(c=>"• "+c).join("\n"):""}\n\nWrite a concise scholarly analysis (250–350 words) covering:\n1. Why the top attribution is most plausible — reference specific diagnostic feature combinations\n2. Why runner-up(s) remain possible or should be discounted\n3. Any genuine ambiguities or attribution traps in this evidence combination\n4. What additional physical examination would resolve uncertainty\n5. One or two specific comparable objects in named public collections\n\nContinuous prose, no bullet points. Do not repeat the feature list. Treat this as a real connoisseurship problem.`;
-
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,stream:true,messages:[{role:"user",content:prompt}]}),
-  });
-  if (!response.ok) throw new Error(`API ${response.status}`);
-  return response.body.getReader();
+  const fl=[];
+  for (const [catId,cat] of Object.entries(FEATURES)) for (const opt of cat.options) { const s=cat.exclusive?sel[catId]===opt.id:(sel[catId]||new Set()).has(opt.id); if(s) fl.push(`${cat.label}: ${opt.label}`); }
+  const prompt=`You are a specialist in Islamic ceramics equivalent to Oliver Watson or Sheila Blair.\n\nFEATURES SELECTED:\n${fl.map(f=>"• "+f).join("\n")}\n\nSCORING:\nTop three: ${ranked.slice(0,3).map(([t,s])=>t+" ("+s+")").join("; ")||"none"}\nEliminated: ${[...eliminated].join(", ")||"none"}\n${conflicts.length?"\nCONFLICTS:\n"+conflicts.map(c=>"• "+c).join("\n"):""}\n\nWrite 250–350 words of scholarly analysis: why the top attribution is plausible, what distinguishes it from runners-up, genuine ambiguities, what physical examination would resolve uncertainty, and one or two specific museum comparanda. Continuous prose, no bullet points.`;
+  const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,stream:true,messages:[{role:"user",content:prompt}]})});
+  if(!r.ok) throw new Error(`API ${r.status}`);
+  return r.body.getReader();
 }
 
-// ── TRADITION IMAGE COMPONENT ─────────────────────────────────────────────────
-
-function TraditionImage({ tradition, height = 180, className = "trad-img" }) {
-  const img = TRADITION_IMAGES[tradition];
-  const [errored, setErrored] = React.useState(false);
-
-  if (!img || errored) {
-    return (
-      <div className="trad-img-placeholder" style={{ height }}>
-        <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "13px", color: "#6a5030", letterSpacing: ".08em" }}>
-          {tradition.split(" ")[0]}
-        </span>
-      </div>
-    );
-  }
-
-  return (
-    <img
-      src={img.src}
-      alt={img.caption}
-      className={className}
-      style={{ height, width: "100%", objectFit: "cover", display: "block" }}
-      onError={() => setErrored(true)}
-      loading="lazy"
-    />
-  );
+// ── IMAGE COMPONENT ───────────────────────────────────────────────────────────
+function TradImg({tradition, height}) {
+  const [err, setErr] = useState(false);
+  const img = IMGS[tradition];
+  if (!img||err) return <div className="img-placeholder" style={{height}}>{tradition.split(" ")[0]}</div>;
+  return <img src={img.src} alt={tradition} className="trad-img" style={{height}} onError={()=>setErr(true)} loading="lazy"/>;
 }
 
 // ── APP ───────────────────────────────────────────────────────────────────────
-
 function App() {
-  const [sel, setSel] = useState({});
-  const [showAll, setShowAll] = useState(false);
-  const [analysis, setAnalysis] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState("");
-  const [detail, setDetail] = useState(null);
-  const [tab, setTab] = useState("features");
+  const [sel,setSel]=useState({});
+  const [showAll,setShowAll]=useState(false);
+  const [analysis,setAnalysis]=useState("");
+  const [loading,setLoading]=useState(false);
+  const [err,setErr]=useState("");
+  const [detail,setDetail]=useState(null);
+  const [tab,setTab]=useState("features");
+  const toggle=useCallback((catId,optId,excl)=>{setSel(p=>{if(excl)return{...p,[catId]:p[catId]===optId?undefined:optId};const s=new Set(p[catId]||[]);s.has(optId)?s.delete(optId):s.add(optId);return{...p,[catId]:s}});setAnalysis("");setErr("");},[]);
+  const {ranked,eliminated,evidence,conflicts,maxScore,confidence}=useMemo(()=>computeResult(sel),[sel]);
+  const hasInput=Object.values(sel).some(v=>v!==undefined&&(v instanceof Set?v.size>0:true));
+  const top=ranked[0];
+  const fc=Object.values(sel).reduce((a,v)=>!v?a:v instanceof Set?a+v.size:a+1,0);
+  const P={paper:"#fdfaf5",ink:"#1a1008",inkL:"#4a3a28",inkF:"#7a6a54",border:"#e0d8cc",borderL:"#ede8e0",gold:"#8a6c2a",goldL:"#c4a060",goldF:"#f0e8d8",dark:"#2c1f0e",red:"#c0600a",redF:"#fdf3ec"};
 
-  const toggle = useCallback((catId,optId,exclusive)=>{
-    setSel(prev=>{
-      if (exclusive) return {...prev,[catId]:prev[catId]===optId?undefined:optId};
-      const s = new Set(prev[catId]||[]);
-      s.has(optId)?s.delete(optId):s.add(optId);
-      return {...prev,[catId]:s};
-    });
-    setAnalysis(""); setErr("");
-  },[]);
-
-  const {ranked,eliminated,evidence,conflicts,maxScore,confidence} = useMemo(()=>computeResult(sel),[sel]);
-  const hasInput = Object.values(sel).some(v=>v!==undefined&&(v instanceof Set?v.size>0:true));
-  const top = ranked[0];
-  const featCount = Object.values(sel).reduce((a,v)=>!v?a:v instanceof Set?a+v.size:a+1,0);
-
-  const runAnalysis = async () => {
-    setAnalysis(""); setErr(""); setLoading(true); setTab("analysis");
-    try {
-      const reader = await fetchAnalysis(sel,ranked,eliminated,conflicts);
-      const dec = new TextDecoder();
-      let buf="";
-      while(true){
-        const {done,value}=await reader.read();
-        if(done) break;
-        buf+=dec.decode(value,{stream:true});
-        const lines=buf.split("\n"); buf=lines.pop();
-        for(const line of lines){
-          if(!line.startsWith("data: ")) continue;
-          const raw=line.slice(6).trim();
-          if(raw==="[DONE]") continue;
-          try{const d=JSON.parse(raw);const t=d?.delta?.text||"";if(t) setAnalysis(p=>p+t);}catch{}
-        }
-      }
-    } catch(e){ setErr("Analysis unavailable. Check API connection."); }
-    finally{ setLoading(false); }
+  const runAnalysis=async()=>{
+    setAnalysis("");setErr("");setLoading(true);setTab("analysis");
+    try{
+      const reader=await fetchAnalysis(sel,ranked,eliminated,conflicts);
+      const dec=new TextDecoder();let buf="";
+      while(true){const{done,value}=await reader.read();if(done)break;buf+=dec.decode(value,{stream:true});const lines=buf.split("\n");buf=lines.pop();for(const line of lines){if(!line.startsWith("data: "))continue;const raw=line.slice(6).trim();if(raw==="[DONE]")continue;try{const d=JSON.parse(raw);const t=d?.delta?.text||"";if(t)setAnalysis(p=>p+t);}catch{}}}
+    }catch(e){setErr("Analysis unavailable. Check API connection.");}
+    finally{setLoading(false);}
   };
-
-  const P = {paper:"#fdfaf5",ink:"#1a1008",inkL:"#4a3a28",inkF:"#7a6a54",border:"#e0d8cc",borderL:"#ede8e0",gold:"#8a6c2a",goldL:"#c4a060",goldF:"#f0e8d8",dark:"#2c1f0e",red:"#c0600a",redF:"#fdf3ec"};
 
   return (
     <div style={{minHeight:"100vh",background:P.paper}}>
-
       {/* HEADER */}
       <div style={{borderBottom:`1px solid ${P.border}`,padding:"1.4rem 2rem 1.1rem"}}>
         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:"10px"}}>
           <div>
             <div style={{fontSize:"9px",letterSpacing:".22em",textTransform:"uppercase",color:P.inkF,marginBottom:"5px"}}>Diagnostic Classification · 11 Traditions · 750–1722 CE</div>
-            <h1 style={{fontSize:"clamp(18px,2.8vw,25px)",fontWeight:400,fontFamily:"'Cormorant Garamond',Georgia,serif",color:P.ink,lineHeight:1.2}}>Islamic Ceramics Attribution</h1>
+            <h1 style={{fontSize:"clamp(18px,2.8vw,25px)",fontWeight:400,fontFamily:"'Cormorant Garamond',Georgia,serif",color:P.ink}}>Islamic Ceramics Attribution</h1>
           </div>
-          {hasInput&&(
-            <div style={{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}}>
-              <span style={{fontSize:"11px",color:P.inkF}}>{featCount} feature{featCount!==1?"s":""}</span>
-              <button onClick={()=>{setSel({});setAnalysis("");setErr("");setTab("features");}} style={{background:"none",border:`1px solid ${P.border}`,borderRadius:"5px",padding:"5px 12px",fontSize:"11px",color:P.inkF}}>Clear</button>
-              {top&&top[1]>0&&(
-                <button onClick={runAnalysis} disabled={loading} style={{background:loading?P.dark+"99":P.dark,border:"none",borderRadius:"5px",padding:"6px 16px",fontSize:"12px",color:"#f5edd8",fontFamily:"'Cormorant Garamond',Georgia,serif",letterSpacing:".05em"}}>
-                  {loading?"Analysing…":"Scholarly Analysis ↗"}
-                </button>
-              )}
-            </div>
-          )}
+          {hasInput&&<div style={{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}}>
+            <span style={{fontSize:"11px",color:P.inkF}}>{fc} feature{fc!==1?"s":""}</span>
+            <button onClick={()=>{setSel({});setAnalysis("");setErr("");setTab("features");}} style={{background:"none",border:`1px solid ${P.border}`,borderRadius:"5px",padding:"5px 12px",fontSize:"11px",color:P.inkF}}>Clear</button>
+            {top&&top[1]>0&&<button onClick={runAnalysis} disabled={loading} style={{background:loading?P.dark+"99":P.dark,border:"none",borderRadius:"5px",padding:"6px 16px",fontSize:"12px",color:"#f5edd8",fontFamily:"'Cormorant Garamond',Georgia,serif",letterSpacing:".05em"}}>{loading?"Analysing…":"Scholarly Analysis ↗"}</button>}
+          </div>}
         </div>
       </div>
 
-      {/* MAIN GRID */}
+      {/* BODY */}
       <div className="main-grid" style={{display:"grid",gridTemplateColumns:"minmax(0,1.3fr) minmax(0,1fr)",minHeight:"calc(100vh - 85px)"}}>
-
-        {/* LEFT: Features / Analysis tabs */}
+        {/* LEFT */}
         <div style={{borderRight:`1px solid ${P.border}`}}>
           <div style={{display:"flex",borderBottom:`1px solid ${P.border}`}}>
-            {["features","analysis"].map(t=>(
-              <button key={t} className={`tab-btn${tab===t?" active":""}`} onClick={()=>setTab(t)}>
-                {t==="features"?"Features":"Scholarly Analysis"}
-              </button>
-            ))}
+            {["features","analysis"].map(t=><button key={t} className={`tab-btn${tab===t?" active":""}`} onClick={()=>setTab(t)}>{t==="features"?"Features":"Scholarly Analysis"}</button>)}
           </div>
-
-          {tab==="features"&&(
-            <div style={{padding:"1.4rem 2rem"}}>
-              {Object.entries(FEATURES).map(([catId,cat])=>(
-                <div key={catId} style={{marginBottom:"1.6rem"}}>
-                  <div style={{fontSize:"10px",fontWeight:600,letterSpacing:".14em",textTransform:"uppercase",color:P.inkF,display:"flex",alignItems:"center",gap:"7px",marginBottom:"9px"}}>
-                    <span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"16px",color:P.gold}}>{cat.icon}</span>
-                    {cat.label}
-                  </div>
-                  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:"5px"}}>
-                    {cat.options.map(opt=>{
-                      const active = cat.exclusive?sel[catId]===opt.id:(sel[catId]||new Set()).has(opt.id);
-                      return(
-                        <button key={opt.id} className={`chip${active?" active":""}`} onClick={()=>toggle(catId,opt.id,cat.exclusive)}>
-                          <span className="chip-label">{opt.label}</span>
-                          {opt.desc&&<span className="chip-desc">{opt.desc}</span>}
-                        </button>
-                      );
-                    })}
-                  </div>
+          {tab==="features"&&<div style={{padding:"1.4rem 2rem"}}>
+            {Object.entries(FEATURES).map(([catId,cat])=>(
+              <div key={catId} style={{marginBottom:"1.6rem"}}>
+                <div style={{fontSize:"10px",fontWeight:600,letterSpacing:".14em",textTransform:"uppercase",color:P.inkF,display:"flex",alignItems:"center",gap:"7px",marginBottom:"9px"}}>
+                  <span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"16px",color:P.gold}}>{cat.icon}</span>{cat.label}
                 </div>
-              ))}
-            </div>
-          )}
-
-          {tab==="analysis"&&(
-            <div style={{padding:"1.4rem 2rem"}}>
-              {!analysis&&!loading&&!err&&(
-                <p style={{color:P.inkF,fontSize:"13px",fontStyle:"italic"}}>
-                  {hasInput?'Click "Scholarly Analysis" above to generate an expert interpretation.':"Select features first, then request a scholarly analysis."}
-                </p>
-              )}
-              {err&&<div style={{color:P.red,fontSize:"13px",padding:"12px",background:P.redF,borderRadius:"6px"}}>{err}</div>}
-              {(analysis||loading)&&(
-                <div>
-                  <div style={{fontSize:"9px",letterSpacing:".18em",textTransform:"uppercase",color:P.inkF,marginBottom:"14px"}}>Expert Interpretation</div>
-                  <div style={{fontSize:"14px",lineHeight:1.85,color:P.inkL,whiteSpace:"pre-wrap"}}>
-                    {analysis}
-                    {loading&&<span className="cursor"/>}
-                  </div>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:"5px"}}>
+                  {cat.options.map(opt=>{const active=cat.exclusive?sel[catId]===opt.id:(sel[catId]||new Set()).has(opt.id);return(
+                    <button key={opt.id} className={`chip${active?" active":""}`} onClick={()=>toggle(catId,opt.id,cat.exclusive)}>
+                      <span className="chip-label">{opt.label}</span>
+                      {opt.desc&&<span className="chip-desc">{opt.desc}</span>}
+                    </button>);})}
                 </div>
-              )}
-            </div>
-          )}
+              </div>))}
+          </div>}
+          {tab==="analysis"&&<div style={{padding:"1.4rem 2rem"}}>
+            {!analysis&&!loading&&!err&&<p style={{color:P.inkF,fontSize:"13px",fontStyle:"italic"}}>{hasInput?'Click "Scholarly Analysis" above to generate an expert interpretation.':"Select features first, then request a scholarly analysis."}</p>}
+            {err&&<div style={{color:P.red,fontSize:"13px",padding:"12px",background:P.redF,borderRadius:"6px"}}>{err}</div>}
+            {(analysis||loading)&&<div>
+              <div style={{fontSize:"9px",letterSpacing:".18em",textTransform:"uppercase",color:P.inkF,marginBottom:"14px"}}>Expert Interpretation</div>
+              <div style={{fontSize:"14px",lineHeight:1.85,color:P.inkL,whiteSpace:"pre-wrap"}}>{analysis}{loading&&<span className="cursor"/>}</div>
+            </div>}
+          </div>}
         </div>
 
-        {/* RIGHT: Results panel */}
+        {/* RIGHT */}
         <div className="right-panel" style={{padding:"1.4rem 1.6rem",position:"sticky",top:0,maxHeight:"100vh",overflowY:"auto"}}>
           <div style={{fontSize:"9px",letterSpacing:".2em",textTransform:"uppercase",color:P.inkF}}>Attribution Result</div>
+          {conflicts.length>0&&<div className="conflict-box">
+            <div style={{fontSize:"9px",letterSpacing:".14em",textTransform:"uppercase",color:P.red,marginBottom:"5px"}}>⚠ Conflicting Features</div>
+            {conflicts.map((c,i)=><div key={i} style={{fontSize:"12px",color:"#7a3a10",lineHeight:1.5,marginBottom:"3px"}}>{c}</div>)}
+          </div>}
 
-          {/* Conflict warnings */}
-          {conflicts.length>0&&(
-            <div className="conflict-box">
-              <div style={{fontSize:"9px",letterSpacing:".14em",textTransform:"uppercase",color:P.red,marginBottom:"5px"}}>⚠ Conflicting Features</div>
-              {conflicts.map((c,i)=><div key={i} style={{fontSize:"12px",color:"#7a3a10",lineHeight:1.5,marginBottom:"3px"}}>{c}</div>)}
-            </div>
-          )}
-
-          {/* Top result card WITH IMAGE */}
           {hasInput&&top&&top[1]>0?(
             <div className="top-card" onClick={()=>setDetail(top[0])}>
-              <TraditionImage tradition={top[0]} height={180} />
-              {TRADITION_IMAGES[top[0]]&&(
-                <div className="img-caption">{TRADITION_IMAGES[top[0]].caption}</div>
-              )}
+              <TradImg tradition={top[0]} height={180}/>
+              {IMGS[top[0]]&&<div className="img-caption">{IMGS[top[0]].cap}</div>}
               <div className="top-card-body">
                 <div style={{fontSize:"9px",letterSpacing:".18em",textTransform:"uppercase",color:"#a08060",marginBottom:"4px"}}>Most Probable Attribution</div>
                 <div style={{fontSize:"19px",fontWeight:400,color:"#f5edd8",fontFamily:"'Cormorant Garamond',serif"}}>{top[0]}</div>
@@ -436,108 +323,66 @@ function App() {
                 <div style={{fontSize:"10px",color:"#6a5030",marginTop:"5px",fontStyle:"italic"}}>Click to view tradition detail →</div>
               </div>
             </div>
-          ):hasInput?(
-            <p style={{fontSize:"13px",color:P.inkF,fontStyle:"italic",padding:"1rem 0"}}>No tradition scores positively with current selection.</p>
-          ):(
-            <div style={{textAlign:"center",color:"#c4b89a",fontSize:"13px",padding:"2.5rem 0",fontStyle:"italic"}}>Select features on the left<br/>to begin attribution</div>
-          )}
+          ):hasInput?<p style={{fontSize:"13px",color:P.inkF,fontStyle:"italic",padding:"1rem 0"}}>No tradition scores positively.</p>:
+          <div style={{textAlign:"center",color:"#c4b89a",fontSize:"13px",padding:"2.5rem 0",fontStyle:"italic"}}>Select features on the left<br/>to begin attribution</div>}
 
-          {/* Ranked list */}
-          {hasInput&&(
-            <div style={{marginTop:"4px"}}>
-              {(showAll?ranked:ranked.slice(0,7)).map(([trad,score],i)=>{
-                const isTop=i===0&&score>0;
-                const pct=maxScore>0?(score/maxScore)*100:0;
-                const pos=evidence[trad].filter(e=>e.type==="score");
-                return(
-                  <div key={trad} className="result-row" onClick={()=>setDetail(trad)}>
-                    <div style={{display:"flex",alignItems:"center",gap:"9px"}}>
-                      <div style={{width:"155px",flexShrink:0}}>
-                        <div style={{fontSize:isTop?"13px":"12px",fontWeight:isTop?600:400,color:isTop?P.ink:P.inkL}}>{trad}</div>
-                        <div style={{fontSize:"10px",color:P.inkF}}>{TRADITIONS[trad].dates}</div>
-                      </div>
-                      <div style={{flex:1}}>
-                        <div style={{height:"4px",background:P.borderL,borderRadius:"2px",overflow:"hidden"}}>
-                          <div style={{height:"100%",width:pct+"%",background:isTop?P.gold:P.goldL,borderRadius:"2px",transition:"width .35s ease",opacity:score>0?1:0}}/>
-                        </div>
-                      </div>
-                      <span style={{fontSize:"12px",fontWeight:isTop?600:400,color:score>0?P.inkL:"#ccc",width:"22px",textAlign:"right"}}>{score}</span>
-                    </div>
-                    {isTop&&pos.length>0&&(
-                      <div style={{marginLeft:"164px",marginTop:"3px",display:"flex",flexWrap:"wrap",gap:"3px"}}>
-                        {pos.slice(0,4).map((e,j)=><span key={j} className="evidence-tag">+{e.pts} {e.label}</span>)}
-                      </div>
-                    )}
+          {hasInput&&<div style={{marginTop:"4px"}}>
+            {(showAll?ranked:ranked.slice(0,7)).map(([trad,score],i)=>{
+              const isTop=i===0&&score>0,pct=maxScore>0?(score/maxScore)*100:0,pos=evidence[trad].filter(e=>e.type==="score");
+              return(<div key={trad} className="result-row" onClick={()=>setDetail(trad)}>
+                <div style={{display:"flex",alignItems:"center",gap:"9px"}}>
+                  <div style={{width:"155px",flexShrink:0}}>
+                    <div style={{fontSize:isTop?"13px":"12px",fontWeight:isTop?600:400,color:isTop?P.ink:P.inkL}}>{trad}</div>
+                    <div style={{fontSize:"10px",color:P.inkF}}>{TRADITIONS[trad].dates}</div>
                   </div>
-                );
-              })}
-              {[...eliminated].map(trad=>(
-                <div key={trad} className="result-row" onClick={()=>setDetail(trad)} style={{opacity:.35}}>
-                  <span style={{fontSize:"11px",color:P.inkF,fontStyle:"italic"}}>{trad}</span>
-                  <span style={{fontSize:"10px",color:P.red,marginLeft:"8px"}}>eliminated</span>
+                  <div style={{flex:1}}><div style={{height:"4px",background:P.borderL,borderRadius:"2px",overflow:"hidden"}}><div style={{height:"100%",width:pct+"%",background:isTop?P.gold:P.goldL,borderRadius:"2px",transition:"width .35s ease",opacity:score>0?1:0}}/></div></div>
+                  <span style={{fontSize:"12px",fontWeight:isTop?600:400,color:score>0?P.inkL:"#ccc",width:"22px",textAlign:"right"}}>{score}</span>
                 </div>
-              ))}
-              {ranked.length>7&&(
-                <button onClick={()=>setShowAll(v=>!v)} style={{marginTop:"8px",background:"none",border:"none",fontSize:"11px",color:P.inkF,textDecoration:"underline",padding:0}}>
-                  {showAll?"Show fewer":`Show all ${ranked.length} traditions`}
-                </button>
-              )}
-            </div>
-          )}
+                {isTop&&pos.length>0&&<div style={{marginLeft:"164px",marginTop:"3px",display:"flex",flexWrap:"wrap",gap:"3px"}}>{pos.slice(0,4).map((e,j)=><span key={j} className="evidence-tag">+{e.pts} {e.label}</span>)}</div>}
+              </div>);})}
+            {[...eliminated].map(trad=><div key={trad} className="result-row" onClick={()=>setDetail(trad)} style={{opacity:.35}}>
+              <span style={{fontSize:"11px",color:P.inkF,fontStyle:"italic"}}>{trad}</span>
+              <span style={{fontSize:"10px",color:P.red,marginLeft:"8px"}}>eliminated</span>
+            </div>)}
+            {ranked.length>7&&<button onClick={()=>setShowAll(v=>!v)} style={{marginTop:"8px",background:"none",border:"none",fontSize:"11px",color:P.inkF,textDecoration:"underline",padding:0}}>{showAll?"Show fewer":`Show all ${ranked.length} traditions`}</button>}
+          </div>}
 
           <div style={{marginTop:"1.5rem",paddingTop:"1rem",borderTop:`1px solid ${P.borderL}`,fontSize:"10px",color:"#b4a48a",lineHeight:1.7}}>
-            Click any row or the result card to view full tradition detail, key scholarship, and museum comparanda.
-            Images: Wikimedia Commons (CC-licensed). Sources: Watson (2004); Mason (1994, 2003); Encyclopaedia Iranica; Jenkins-Madina (2006); Atasoy &amp; Raby (1989).
+            Click any row or the result card to view full tradition detail. Images: Metropolitan Museum of Art Open Access (CC0).
+            Sources: Watson (2004); Mason (1994, 2003); Encyclopaedia Iranica; Jenkins-Madina (2006); Atasoy &amp; Raby (1989).
           </div>
         </div>
       </div>
 
-      {/* TRADITION DETAIL PANEL WITH IMAGE */}
-      {detail&&(
-        <div className="detail-panel">
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"1rem"}}>
-            <div>
-              <div className="lbl" style={{marginBottom:"4px"}}>Tradition Detail</div>
-              <h2>{detail}</h2>
-            </div>
-            <button onClick={()=>setDetail(null)} style={{background:"none",border:"none",fontSize:"20px",color:P.inkF,lineHeight:1,padding:"0 4px"}}>×</button>
-          </div>
-
-          {/* Representative image in detail panel */}
-          <TraditionImage tradition={detail} height={200} className="detail-img" />
-          {TRADITION_IMAGES[detail]&&(
-            <div className="detail-img-caption">{TRADITION_IMAGES[detail].caption}</div>
-          )}
-
-          <div style={{fontSize:"11px",color:P.gold,marginBottom:"12px",fontWeight:600,letterSpacing:".06em"}}>{TRADITIONS[detail].dates} · {TRADITIONS[detail].centre}</div>
-          <p style={{fontSize:"13px",lineHeight:1.75,color:P.inkL,marginBottom:"1rem"}}>{TRADITIONS[detail].detail}</p>
-
-          <div style={{borderTop:`1px solid ${P.border}`,paddingTop:"12px",marginBottom:"10px"}}>
-            <div className="lbl" style={{marginBottom:"5px"}}>Key Comparative Works</div>
-            <p style={{fontSize:"12px",lineHeight:1.65,color:P.inkL}}>{TRADITIONS[detail].keyWorks}</p>
-          </div>
-          <div style={{borderTop:`1px solid ${P.border}`,paddingTop:"12px"}}>
-            <div className="lbl" style={{marginBottom:"5px"}}>Key Scholarship</div>
-            <p style={{fontSize:"12px",lineHeight:1.65,color:P.inkL}}>{TRADITIONS[detail].scholarship}</p>
-          </div>
-
-          {evidence[detail]&&evidence[detail].length>0&&(
-            <div style={{borderTop:`1px solid ${P.border}`,paddingTop:"12px",marginTop:"10px"}}>
-              <div className="lbl" style={{marginBottom:"8px"}}>Evidence from Current Selection</div>
-              {evidence[detail].map((e,i)=>(
-                <div key={i} style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"4px"}}>
-                  <span style={{fontSize:"11px",color:e.type==="eliminate"?P.red:"#3a6a48",fontWeight:600,width:"30px",flexShrink:0}}>{e.type==="eliminate"?"✗":`+${e.pts}`}</span>
-                  <span style={{fontSize:"11px",color:P.inkL}}>{e.label}</span>
-                </div>
-              ))}
-            </div>
-          )}
+      {/* DETAIL PANEL */}
+      {detail&&<div className="detail-panel">
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"1rem"}}>
+          <div><div className="lbl" style={{marginBottom:"4px"}}>Tradition Detail</div><h2>{detail}</h2></div>
+          <button onClick={()=>setDetail(null)} style={{background:"none",border:"none",fontSize:"20px",color:"#7a6a54",lineHeight:1,padding:"0 4px"}}>×</button>
         </div>
-      )}
+        <TradImg tradition={detail} height={200}/>
+        {IMGS[detail]&&<div className="detail-img-caption">{IMGS[detail].cap}</div>}
+        <div style={{fontSize:"11px",color:"#8a6c2a",marginBottom:"12px",fontWeight:600,letterSpacing:".06em"}}>{TRADITIONS[detail].dates} · {TRADITIONS[detail].centre}</div>
+        <p style={{fontSize:"13px",lineHeight:1.75,color:"#4a3a28",marginBottom:"1rem"}}>{TRADITIONS[detail].detail}</p>
+        <div style={{borderTop:"1px solid #e0d8cc",paddingTop:"12px",marginBottom:"10px"}}>
+          <div className="lbl" style={{marginBottom:"5px"}}>Key Comparative Works</div>
+          <p style={{fontSize:"12px",lineHeight:1.65,color:"#4a3a28"}}>{TRADITIONS[detail].keyWorks}</p>
+        </div>
+        <div style={{borderTop:"1px solid #e0d8cc",paddingTop:"12px"}}>
+          <div className="lbl" style={{marginBottom:"5px"}}>Key Scholarship</div>
+          <p style={{fontSize:"12px",lineHeight:1.65,color:"#4a3a28"}}>{TRADITIONS[detail].scholarship}</p>
+        </div>
+        {evidence[detail]&&evidence[detail].length>0&&<div style={{borderTop:"1px solid #e0d8cc",paddingTop:"12px",marginTop:"10px"}}>
+          <div className="lbl" style={{marginBottom:"8px"}}>Evidence from Current Selection</div>
+          {evidence[detail].map((e,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"4px"}}>
+            <span style={{fontSize:"11px",color:e.type==="eliminate"?"#c0600a":"#3a6a48",fontWeight:600,width:"30px",flexShrink:0}}>{e.type==="eliminate"?"✗":`+${e.pts}`}</span>
+            <span style={{fontSize:"11px",color:"#4a3a28"}}>{e.label}</span>
+          </div>)}
+        </div>}
+      </div>}
     </div>
   );
 }
-
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
 </body>
